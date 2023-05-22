@@ -1,4 +1,7 @@
 import csv 
+import os 
+from terminaltables import AsciiTable 
+
 
 project_name = "Ky Expense Tracker"
 
@@ -23,22 +26,36 @@ def add_expenses(file):
     amount = input("What is the amount (GH¢)? ==>")
     description = input("Enter some description (optional) ==>")
 
-    print("Title:\t", title)
-    print("Amount:\t", amount)
-    print("description:\t", description)
-
+    data = [title, amount, description]
+    table = AsciiTable([["Title", "Amount", "Description"], data])
+    print(table.table)
     yes_or_no = input("Confirm you want to add this expense: yes(y)/no(n) ==>")
     
     if yes_or_no == "yes" or "YES" or "y" or "Y":
         print("Persisting to db...")
         # add to the csv file
         writer = csv.writer(file)
-        writer.writerow([title, amount, description])
+        writer.writerow(data)
+        table = AsciiTable([["Title", "Amount", "Description"], data])
         print("Added to db")
+        print(table.table)
         print(underline)
     else:
         print("Aborted...")
 
+
+def view_expenses(file):
+    # data = [file.readlines()]
+    data = [["Title", "Amount", "Description"]]
+    file.seek(0)
+    reader = csv.reader(file)
+    expenses = list(reader)
+    for expense in expenses:
+        data.append(expense)
+
+    table = AsciiTable(data)
+    print(table.table)
+   
 
 def main():
     print(underline)
@@ -50,7 +67,10 @@ def main():
     # check if file exists, 
     # if file exists --> open in write mode 
     # else open in append mode
-    file = open("expenses.csv", "w")
+    mode = "w+"
+    if os.path.exists("expenses.csv"):
+        mode = "a+"
+    file = open("expenses.csv", mode)
 
     choice = -1
     while choice != 0:
@@ -60,7 +80,8 @@ def main():
         # Conditions ===> if, elif, else
         if choice == 1:
             add_expenses(file)
-
+        if choice == 2:
+            view_expenses(file)
 if __name__ == "__main__":
     main()
 
